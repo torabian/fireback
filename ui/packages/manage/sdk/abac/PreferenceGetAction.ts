@@ -206,7 +206,7 @@ export class PreferenceGetAction {
   static Definition = {
     name: "preferenceGet",
     cliName: "get",
-    cliShort: "preference-g",
+    cliShort: "g",
     url: "/preference/:uniqueId string",
     method: "get",
     description: 'Looks up a single "preference" row by uniqueId.',

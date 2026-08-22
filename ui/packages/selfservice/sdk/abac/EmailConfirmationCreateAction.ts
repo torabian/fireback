@@ -139,7 +139,7 @@ export class EmailConfirmationCreateAction {
   static Definition = {
     name: "emailConfirmationCreate",
     cliName: "create",
-    cliShort: "emailConfirmation-c",
+    cliShort: "c",
     url: "/emailConfirmation",
     method: "post",
     description: 'Creates a new "emailConfirmation" row.',

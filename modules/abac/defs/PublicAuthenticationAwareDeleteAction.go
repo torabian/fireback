@@ -40,7 +40,7 @@ func PublicAuthenticationAwareDeleteActionMeta() struct {
 	}{
 		Name:        "PublicAuthenticationAwareDeleteAction",
 		CliName:     "delete",
-		CliShort:    "publicAuthentication-d",
+		CliShort:    "d",
 		URL:         "/publicAuthentication/delete",
 		Method:      "POST",
 		Description: `Deletes the given "publicAuthentication" uniqueIds, along with everything publicAuthenticationAwareDeletePreview reports.`,

@@ -153,7 +153,7 @@ export class TimezoneGroupUpdateAction {
   static Definition = {
     name: "timezoneGroupUpdate",
     cliName: "update",
-    cliShort: "timezoneGroup-u",
+    cliShort: "u",
     url: "/timezoneGroup/:uniqueId string",
     method: "patch",
     description:

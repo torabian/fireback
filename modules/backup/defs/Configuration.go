@@ -61,7 +61,10 @@ You can call this function on first line of your main function.
 This is different from fireback configuration (for now), you can
 define config: in module3 file, similar to fields in entities,
 and we generate the config struct and this function would read .env.local,
-.env.prod, etc - depending on the ENV=xxx env variable.
+.env.prod, etc - depending on the ENV=xxx env variable (or, under a wasm
+build, whatever env vars the host page already set via os.Setenv before
+this ran - see emigo.HandleEnvVars's own doc comments in Config.go/
+ConfigWasm.go for the two implementations this dispatches to).
 *
 */
 func LoadConfiguration() Config {

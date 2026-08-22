@@ -40,7 +40,7 @@ func TableViewSizingCreateActionMeta() struct {
 	}{
 		Name:        "TableViewSizingCreateAction",
 		CliName:     "create",
-		CliShort:    "tableViewSizing-c",
+		CliShort:    "c",
 		URL:         "/tableViewSizing",
 		Method:      "POST",
 		Description: `Creates a new "tableViewSizing" row.`,

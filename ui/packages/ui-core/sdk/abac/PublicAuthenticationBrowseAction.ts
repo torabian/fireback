@@ -201,7 +201,7 @@ export class PublicAuthenticationBrowseAction {
   static Definition = {
     name: "publicAuthenticationBrowse",
     cliName: "browse",
-    cliShort: "publicAuthentication-b",
+    cliShort: "b",
     url: "/publicAuthentication/browse",
     method: "get",
     qs: [

@@ -198,7 +198,7 @@ export class TimezoneGroupBrowseAction {
   static Definition = {
     name: "timezoneGroupBrowse",
     cliName: "browse",
-    cliShort: "timezoneGroup-b",
+    cliShort: "b",
     url: "/timezoneGroup/browse",
     method: "get",
     qs: [

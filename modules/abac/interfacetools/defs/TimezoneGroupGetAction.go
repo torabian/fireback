@@ -40,7 +40,7 @@ func TimezoneGroupGetActionMeta() struct {
 	}{
 		Name:        "TimezoneGroupGetAction",
 		CliName:     "get",
-		CliShort:    "timezoneGroup-g",
+		CliShort:    "g",
 		URL:         "/timezoneGroup/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "timezoneGroup" row by uniqueId.`,

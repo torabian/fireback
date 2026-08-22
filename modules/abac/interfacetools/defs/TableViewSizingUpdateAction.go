@@ -41,7 +41,7 @@ func TableViewSizingUpdateActionMeta() struct {
 	}{
 		Name:        "TableViewSizingUpdateAction",
 		CliName:     "update",
-		CliShort:    "tableViewSizing-u",
+		CliShort:    "u",
 		URL:         "/tableViewSizing/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "tableViewSizing" row by uniqueId.`,

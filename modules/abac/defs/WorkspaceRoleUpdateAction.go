@@ -41,7 +41,7 @@ func WorkspaceRoleUpdateActionMeta() struct {
 	}{
 		Name:        "WorkspaceRoleUpdateAction",
 		CliName:     "update",
-		CliShort:    "workspaceRole-u",
+		CliShort:    "u",
 		URL:         "/workspaceRole/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "workspaceRole" row by uniqueId.`,

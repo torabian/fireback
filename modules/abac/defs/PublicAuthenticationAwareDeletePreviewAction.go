@@ -39,7 +39,7 @@ func PublicAuthenticationAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "PublicAuthenticationAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "publicAuthentication-dp",
+		CliShort:    "dp",
 		URL:         "/publicAuthentication/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "publicAuthentication" uniqueIds would affect, without deleting anything.`,

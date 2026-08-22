@@ -4,15 +4,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/gin-gonic/gin"
+	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli/v3"
 )
 
 /**
@@ -45,7 +44,7 @@ func EmailProviderAwareDeleteActionMeta() struct {
 	}{
 		Name:        "EmailProviderAwareDeleteAction",
 		CliName:     "delete",
-		CliShort:    "emailProvider-d",
+		CliShort:    "d",
 		URL:         "/emailProvider/delete",
 		Method:      "POST",
 		Description: `Deletes the given "emailProvider" uniqueIds, along with everything emailProviderAwareDeletePreview reports.`,

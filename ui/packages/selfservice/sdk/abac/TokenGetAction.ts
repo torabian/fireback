@@ -194,7 +194,7 @@ export class TokenGetAction {
   static Definition = {
     name: "tokenGet",
     cliName: "get",
-    cliShort: "token-g",
+    cliShort: "g",
     url: "/token/:uniqueId string",
     method: "get",
     description: 'Looks up a single "token" row by uniqueId.',

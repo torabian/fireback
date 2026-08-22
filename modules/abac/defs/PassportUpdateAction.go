@@ -41,7 +41,7 @@ func PassportUpdateActionMeta() struct {
 	}{
 		Name:        "PassportUpdateAction",
 		CliName:     "update",
-		CliShort:    "passport-u",
+		CliShort:    "u",
 		URL:         "/passport/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "passport" row by uniqueId.`,

@@ -115,7 +115,7 @@ export class WorkspaceInviteAwareDeleteAction {
   static Definition = {
     name: "workspaceInviteAwareDelete",
     cliName: "delete",
-    cliShort: "workspaceInvite-d",
+    cliShort: "d",
     url: "/workspaceInvite/delete",
     method: "post",
     description:

@@ -39,7 +39,7 @@ func UserBrowseActionMeta() struct {
 	}{
 		Name:        "UserBrowseAction",
 		CliName:     "browse",
-		CliShort:    "user-b",
+		CliShort:    "b",
 		URL:         "/user/browse",
 		Method:      "GET",
 		Description: `Returns "user" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

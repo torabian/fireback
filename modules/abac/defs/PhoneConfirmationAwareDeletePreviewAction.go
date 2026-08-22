@@ -39,7 +39,7 @@ func PhoneConfirmationAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "PhoneConfirmationAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "phoneConfirmation-dp",
+		CliShort:    "dp",
 		URL:         "/phoneConfirmation/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "phoneConfirmation" uniqueIds would affect, without deleting anything.`,

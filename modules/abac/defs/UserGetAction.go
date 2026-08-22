@@ -40,7 +40,7 @@ func UserGetActionMeta() struct {
 	}{
 		Name:        "UserGetAction",
 		CliName:     "get",
-		CliShort:    "user-g",
+		CliShort:    "g",
 		URL:         "/user/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "user" row by uniqueId.`,

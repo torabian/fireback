@@ -209,7 +209,7 @@ export class RegionalContentAwareDeletePreviewAction {
   static Definition = {
     name: "regionalContentAwareDeletePreview",
     cliName: "delete-preview",
-    cliShort: "regionalContent-dp",
+    cliShort: "dp",
     url: "/regionalContent/delete-preview",
     method: "get",
     qs: [

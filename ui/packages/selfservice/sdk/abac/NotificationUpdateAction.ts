@@ -149,7 +149,7 @@ export class NotificationUpdateAction {
   static Definition = {
     name: "notificationUpdate",
     cliName: "update",
-    cliShort: "notification-u",
+    cliShort: "u",
     url: "/notification/:uniqueId string",
     method: "patch",
     description:

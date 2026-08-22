@@ -44,7 +44,7 @@ func GsmProviderBrowseActionMeta() struct {
 	}{
 		Name:        "GsmProviderBrowseAction",
 		CliName:     "browse",
-		CliShort:    "gsmProvider-b",
+		CliShort:    "b",
 		URL:         "/gsmProvider/browse",
 		Method:      "GET",
 		Description: `Returns "gsmProvider" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

@@ -39,7 +39,7 @@ func TokenBrowseActionMeta() struct {
 	}{
 		Name:        "TokenBrowseAction",
 		CliName:     "browse",
-		CliShort:    "token-b",
+		CliShort:    "b",
 		URL:         "/token/browse",
 		Method:      "GET",
 		Description: `Returns "token" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

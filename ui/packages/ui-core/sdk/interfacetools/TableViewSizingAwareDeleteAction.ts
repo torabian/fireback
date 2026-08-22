@@ -115,7 +115,7 @@ export class TableViewSizingAwareDeleteAction {
   static Definition = {
     name: "tableViewSizingAwareDelete",
     cliName: "delete",
-    cliShort: "tableViewSizing-d",
+    cliShort: "d",
     url: "/tableViewSizing/delete",
     method: "post",
     description:

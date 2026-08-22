@@ -135,7 +135,7 @@ export class EmailSenderCreateAction {
   static Definition = {
     name: "emailSenderCreate",
     cliName: "create",
-    cliShort: "emailSender-c",
+    cliShort: "c",
     url: "/emailSender",
     method: "post",
     description: 'Creates a new "emailSender" row.',

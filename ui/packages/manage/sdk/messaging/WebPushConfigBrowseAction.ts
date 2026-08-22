@@ -198,7 +198,7 @@ export class WebPushConfigBrowseAction {
   static Definition = {
     name: "webPushConfigBrowse",
     cliName: "browse",
-    cliShort: "webPushConfig-b",
+    cliShort: "b",
     url: "/webPushConfig/browse",
     method: "get",
     qs: [

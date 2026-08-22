@@ -115,7 +115,7 @@ export class PhoneConfirmationAwareDeleteAction {
   static Definition = {
     name: "phoneConfirmationAwareDelete",
     cliName: "delete",
-    cliShort: "phoneConfirmation-d",
+    cliShort: "d",
     url: "/phoneConfirmation/delete",
     method: "post",
     description:

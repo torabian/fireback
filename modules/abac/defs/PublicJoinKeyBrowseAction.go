@@ -39,7 +39,7 @@ func PublicJoinKeyBrowseActionMeta() struct {
 	}{
 		Name:        "PublicJoinKeyBrowseAction",
 		CliName:     "browse",
-		CliShort:    "publicJoinKey-b",
+		CliShort:    "b",
 		URL:         "/publicJoinKey/browse",
 		Method:      "GET",
 		Description: `Returns "publicJoinKey" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

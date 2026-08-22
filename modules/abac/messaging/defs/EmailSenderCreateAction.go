@@ -44,7 +44,7 @@ func EmailSenderCreateActionMeta() struct {
 	}{
 		Name:        "EmailSenderCreateAction",
 		CliName:     "create",
-		CliShort:    "emailSender-c",
+		CliShort:    "c",
 		URL:         "/emailSender",
 		Method:      "POST",
 		Description: `Creates a new "emailSender" row.`,

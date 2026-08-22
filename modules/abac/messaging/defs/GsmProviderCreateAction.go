@@ -44,7 +44,7 @@ func GsmProviderCreateActionMeta() struct {
 	}{
 		Name:        "GsmProviderCreateAction",
 		CliName:     "create",
-		CliShort:    "gsmProvider-c",
+		CliShort:    "c",
 		URL:         "/gsmProvider",
 		Method:      "POST",
 		Description: `Creates a new "gsmProvider" row.`,

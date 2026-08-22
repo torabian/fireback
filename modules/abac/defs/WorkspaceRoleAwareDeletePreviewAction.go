@@ -39,7 +39,7 @@ func WorkspaceRoleAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "WorkspaceRoleAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "workspaceRole-dp",
+		CliShort:    "dp",
 		URL:         "/workspaceRole/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "workspaceRole" uniqueIds would affect, without deleting anything.`,

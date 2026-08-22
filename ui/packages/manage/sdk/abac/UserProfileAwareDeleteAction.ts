@@ -115,7 +115,7 @@ export class UserProfileAwareDeleteAction {
   static Definition = {
     name: "userProfileAwareDelete",
     cliName: "delete",
-    cliShort: "userProfile-d",
+    cliShort: "d",
     url: "/userProfile/delete",
     method: "post",
     description:

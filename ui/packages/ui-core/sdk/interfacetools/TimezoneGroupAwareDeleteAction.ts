@@ -115,7 +115,7 @@ export class TimezoneGroupAwareDeleteAction {
   static Definition = {
     name: "timezoneGroupAwareDelete",
     cliName: "delete",
-    cliShort: "timezoneGroup-d",
+    cliShort: "d",
     url: "/timezoneGroup/delete",
     method: "post",
     description:

@@ -43,7 +43,7 @@ func EmailProviderAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "EmailProviderAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "emailProvider-dp",
+		CliShort:    "dp",
 		URL:         "/emailProvider/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "emailProvider" uniqueIds would affect, without deleting anything.`,

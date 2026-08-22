@@ -39,7 +39,7 @@ func TableViewSizingBrowseActionMeta() struct {
 	}{
 		Name:        "TableViewSizingBrowseAction",
 		CliName:     "browse",
-		CliShort:    "tableViewSizing-b",
+		CliShort:    "b",
 		URL:         "/tableViewSizing/browse",
 		Method:      "GET",
 		Description: `Returns "tableViewSizing" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

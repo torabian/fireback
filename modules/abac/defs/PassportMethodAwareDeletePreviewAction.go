@@ -39,7 +39,7 @@ func PassportMethodAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "PassportMethodAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "passportMethod-dp",
+		CliShort:    "dp",
 		URL:         "/passportMethod/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "passportMethod" uniqueIds would affect, without deleting anything.`,

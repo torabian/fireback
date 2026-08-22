@@ -43,7 +43,7 @@ func WebPushConfigAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "WebPushConfigAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "webPushConfig-dp",
+		CliShort:    "dp",
 		URL:         "/webPushConfig/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "webPushConfig" uniqueIds would affect, without deleting anything.`,

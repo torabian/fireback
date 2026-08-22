@@ -41,7 +41,7 @@ func TimezoneGroupUpdateActionMeta() struct {
 	}{
 		Name:        "TimezoneGroupUpdateAction",
 		CliName:     "update",
-		CliShort:    "timezoneGroup-u",
+		CliShort:    "u",
 		URL:         "/timezoneGroup/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "timezoneGroup" row by uniqueId.`,

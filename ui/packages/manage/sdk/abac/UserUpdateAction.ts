@@ -149,7 +149,7 @@ export class UserUpdateAction {
   static Definition = {
     name: "userUpdate",
     cliName: "update",
-    cliShort: "user-u",
+    cliShort: "u",
     url: "/user/:uniqueId string",
     method: "patch",
     description: 'Applies a partial update to a "user" row by uniqueId.',

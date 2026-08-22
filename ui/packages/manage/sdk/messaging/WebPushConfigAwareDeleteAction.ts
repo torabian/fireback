@@ -115,7 +115,7 @@ export class WebPushConfigAwareDeleteAction {
   static Definition = {
     name: "webPushConfigAwareDelete",
     cliName: "delete",
-    cliShort: "webPushConfig-d",
+    cliShort: "d",
     url: "/webPushConfig/delete",
     method: "post",
     description:

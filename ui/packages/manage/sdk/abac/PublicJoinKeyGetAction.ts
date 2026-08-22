@@ -206,7 +206,7 @@ export class PublicJoinKeyGetAction {
   static Definition = {
     name: "publicJoinKeyGet",
     cliName: "get",
-    cliShort: "publicJoinKey-g",
+    cliShort: "g",
     url: "/publicJoinKey/:uniqueId string",
     method: "get",
     description: 'Looks up a single "publicJoinKey" row by uniqueId.',

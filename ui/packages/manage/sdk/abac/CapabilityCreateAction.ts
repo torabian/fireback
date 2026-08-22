@@ -130,7 +130,7 @@ export class CapabilityCreateAction {
   static Definition = {
     name: "capabilityCreate",
     cliName: "create",
-    cliShort: "capability-c",
+    cliShort: "c",
     url: "/capability",
     method: "post",
     description: 'Creates a new "capability" row.',

@@ -45,7 +45,7 @@ func EmailProviderUpdateActionMeta() struct {
 	}{
 		Name:        "EmailProviderUpdateAction",
 		CliName:     "update",
-		CliShort:    "emailProvider-u",
+		CliShort:    "u",
 		URL:         "/emailProvider/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "emailProvider" row by uniqueId.`,

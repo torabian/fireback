@@ -40,7 +40,7 @@ func PublicJoinKeyCreateActionMeta() struct {
 	}{
 		Name:        "PublicJoinKeyCreateAction",
 		CliName:     "create",
-		CliShort:    "publicJoinKey-c",
+		CliShort:    "c",
 		URL:         "/publicJoinKey",
 		Method:      "POST",
 		Description: `Creates a new "publicJoinKey" row.`,

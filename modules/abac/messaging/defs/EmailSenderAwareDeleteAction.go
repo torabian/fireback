@@ -44,7 +44,7 @@ func EmailSenderAwareDeleteActionMeta() struct {
 	}{
 		Name:        "EmailSenderAwareDeleteAction",
 		CliName:     "delete",
-		CliShort:    "emailSender-d",
+		CliShort:    "d",
 		URL:         "/emailSender/delete",
 		Method:      "POST",
 		Description: `Deletes the given "emailSender" uniqueIds, along with everything emailSenderAwareDeletePreview reports.`,

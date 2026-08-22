@@ -39,7 +39,7 @@ func PublicAuthenticationBrowseActionMeta() struct {
 	}{
 		Name:        "PublicAuthenticationBrowseAction",
 		CliName:     "browse",
-		CliShort:    "publicAuthentication-b",
+		CliShort:    "b",
 		URL:         "/publicAuthentication/browse",
 		Method:      "GET",
 		Description: `Returns "publicAuthentication" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

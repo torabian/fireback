@@ -40,7 +40,7 @@ func WorkspaceRoleGetActionMeta() struct {
 	}{
 		Name:        "WorkspaceRoleGetAction",
 		CliName:     "get",
-		CliShort:    "workspaceRole-g",
+		CliShort:    "g",
 		URL:         "/workspaceRole/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "workspaceRole" row by uniqueId.`,

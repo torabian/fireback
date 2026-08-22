@@ -40,7 +40,7 @@ func PassportMethodCreateActionMeta() struct {
 	}{
 		Name:        "PassportMethodCreateAction",
 		CliName:     "create",
-		CliShort:    "passportMethod-c",
+		CliShort:    "c",
 		URL:         "/passportMethod",
 		Method:      "POST",
 		Description: `Creates a new "passportMethod" row.`,

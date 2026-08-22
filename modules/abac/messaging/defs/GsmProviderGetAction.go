@@ -44,7 +44,7 @@ func GsmProviderGetActionMeta() struct {
 	}{
 		Name:        "GsmProviderGetAction",
 		CliName:     "get",
-		CliShort:    "gsmProvider-g",
+		CliShort:    "g",
 		URL:         "/gsmProvider/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "gsmProvider" row by uniqueId.`,

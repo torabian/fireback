@@ -110,7 +110,7 @@ export class RoleAwareDeleteAction {
   static Definition = {
     name: "roleAwareDelete",
     cliName: "delete",
-    cliShort: "role-d",
+    cliShort: "d",
     url: "/role/delete",
     method: "post",
     description:

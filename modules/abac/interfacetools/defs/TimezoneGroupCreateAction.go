@@ -40,7 +40,7 @@ func TimezoneGroupCreateActionMeta() struct {
 	}{
 		Name:        "TimezoneGroupCreateAction",
 		CliName:     "create",
-		CliShort:    "timezoneGroup-c",
+		CliShort:    "c",
 		URL:         "/timezoneGroup",
 		Method:      "POST",
 		Description: `Creates a new "timezoneGroup" row.`,

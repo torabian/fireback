@@ -40,7 +40,7 @@ func CapabilityAwareDeleteActionMeta() struct {
 	}{
 		Name:        "CapabilityAwareDeleteAction",
 		CliName:     "delete",
-		CliShort:    "capability-d",
+		CliShort:    "d",
 		URL:         "/capability/delete",
 		Method:      "POST",
 		Description: `Deletes the given "capability" uniqueIds, along with everything capabilityAwareDeletePreview reports.`,

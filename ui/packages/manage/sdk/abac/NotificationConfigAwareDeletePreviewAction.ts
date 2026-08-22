@@ -211,7 +211,7 @@ export class NotificationConfigAwareDeletePreviewAction {
   static Definition = {
     name: "notificationConfigAwareDeletePreview",
     cliName: "delete-preview",
-    cliShort: "notificationConfig-dp",
+    cliShort: "dp",
     url: "/notificationConfig/delete-preview",
     method: "get",
     qs: [

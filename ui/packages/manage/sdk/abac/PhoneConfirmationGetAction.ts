@@ -206,7 +206,7 @@ export class PhoneConfirmationGetAction {
   static Definition = {
     name: "phoneConfirmationGet",
     cliName: "get",
-    cliShort: "phoneConfirmation-g",
+    cliShort: "g",
     url: "/phoneConfirmation/:uniqueId string",
     method: "get",
     description: 'Looks up a single "phoneConfirmation" row by uniqueId.',

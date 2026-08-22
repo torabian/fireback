@@ -40,7 +40,7 @@ func CapabilityCreateActionMeta() struct {
 	}{
 		Name:        "CapabilityCreateAction",
 		CliName:     "create",
-		CliShort:    "capability-c",
+		CliShort:    "c",
 		URL:         "/capability",
 		Method:      "POST",
 		Description: `Creates a new "capability" row.`,

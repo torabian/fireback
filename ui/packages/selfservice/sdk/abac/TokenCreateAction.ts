@@ -130,7 +130,7 @@ export class TokenCreateAction {
   static Definition = {
     name: "tokenCreate",
     cliName: "create",
-    cliShort: "token-c",
+    cliShort: "c",
     url: "/token",
     method: "post",
     description: 'Creates a new "token" row.',

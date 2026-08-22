@@ -206,7 +206,7 @@ export class WebPushConfigGetAction {
   static Definition = {
     name: "webPushConfigGet",
     cliName: "get",
-    cliShort: "webPushConfig-g",
+    cliShort: "g",
     url: "/webPushConfig/:uniqueId string",
     method: "get",
     description: 'Looks up a single "webPushConfig" row by uniqueId.',

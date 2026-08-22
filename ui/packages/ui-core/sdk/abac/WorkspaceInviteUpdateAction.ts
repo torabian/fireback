@@ -153,7 +153,7 @@ export class WorkspaceInviteUpdateAction {
   static Definition = {
     name: "workspaceInviteUpdate",
     cliName: "update",
-    cliShort: "workspaceInvite-u",
+    cliShort: "u",
     url: "/workspaceInvite/:uniqueId string",
     method: "patch",
     description:

@@ -3825,7 +3825,7 @@ actions:
           type: float64
 - name: capabilityCreate
   cliName: create
-  cliShort: capability-c
+  cliShort: c
   url: /capability
   method: post
   description: Creates a new "capability" row.
@@ -3836,7 +3836,7 @@ actions:
     dto: CapabilityDto
 - name: capabilityUpdate
   cliName: update
-  cliShort: capability-u
+  cliShort: u
   url: /capability/:uniqueId
   method: patch
   description: Applies a partial update to a "capability" row by uniqueId.
@@ -3847,7 +3847,7 @@ actions:
     dto: CapabilityDto
 - name: capabilityGet
   cliName: get
-  cliShort: capability-g
+  cliShort: g
   url: /capability/:uniqueId
   method: get
   description: Looks up a single "capability" row by uniqueId.
@@ -3856,7 +3856,7 @@ actions:
     dto: CapabilityDto
 - name: capabilityBrowse
   cliName: browse
-  cliShort: capability-b
+  cliShort: b
   url: /capability/browse
   method: get
   qs:
@@ -3876,7 +3876,7 @@ actions:
     dto: CapabilityOptionalDto
 - name: capabilityAwareDeletePreview
   cliName: delete-preview
-  cliShort: capability-dp
+  cliShort: dp
   url: /capability/delete-preview
   method: get
   qs:
@@ -3899,7 +3899,7 @@ actions:
         type: int64
 - name: capabilityAwareDelete
   cliName: delete
-  cliShort: capability-d
+  cliShort: d
   url: /capability/delete
   method: post
   description: Deletes the given "capability" uniqueIds, along with everything capabilityAwareDeletePreview
@@ -3911,7 +3911,7 @@ actions:
       primitive: string
 - name: passportMethodCreate
   cliName: create
-  cliShort: passportMethod-c
+  cliShort: c
   url: /passportMethod
   method: post
   description: Creates a new "passportMethod" row.
@@ -3922,7 +3922,7 @@ actions:
     dto: PassportMethodDto
 - name: passportMethodUpdate
   cliName: update
-  cliShort: passportMethod-u
+  cliShort: u
   url: /passportMethod/:uniqueId
   method: patch
   description: Applies a partial update to a "passportMethod" row by uniqueId.
@@ -3933,7 +3933,7 @@ actions:
     dto: PassportMethodDto
 - name: passportMethodGet
   cliName: get
-  cliShort: passportMethod-g
+  cliShort: g
   url: /passportMethod/:uniqueId
   method: get
   description: Looks up a single "passportMethod" row by uniqueId.
@@ -3942,7 +3942,7 @@ actions:
     dto: PassportMethodDto
 - name: passportMethodBrowse
   cliName: browse
-  cliShort: passportMethod-b
+  cliShort: b
   url: /passportMethod/browse
   method: get
   qs:
@@ -3963,7 +3963,7 @@ actions:
     dto: PassportMethodOptionalDto
 - name: passportMethodAwareDeletePreview
   cliName: delete-preview
-  cliShort: passportMethod-dp
+  cliShort: dp
   url: /passportMethod/delete-preview
   method: get
   qs:
@@ -3986,7 +3986,7 @@ actions:
         type: int64
 - name: passportMethodAwareDelete
   cliName: delete
-  cliShort: passportMethod-d
+  cliShort: d
   url: /passportMethod/delete
   method: post
   description: Deletes the given "passportMethod" uniqueIds, along with everything
@@ -3998,7 +3998,7 @@ actions:
       primitive: string
 - name: pendingWorkspaceInviteCreate
   cliName: create
-  cliShort: pendingWorkspaceInvite-c
+  cliShort: c
   url: /pendingWorkspaceInvite
   method: post
   description: Creates a new "pendingWorkspaceInvite" row.
@@ -4009,7 +4009,7 @@ actions:
     dto: PendingWorkspaceInviteDto
 - name: pendingWorkspaceInviteUpdate
   cliName: update
-  cliShort: pendingWorkspaceInvite-u
+  cliShort: u
   url: /pendingWorkspaceInvite/:uniqueId
   method: patch
   description: Applies a partial update to a "pendingWorkspaceInvite" row by uniqueId.
@@ -4020,7 +4020,7 @@ actions:
     dto: PendingWorkspaceInviteDto
 - name: pendingWorkspaceInviteGet
   cliName: get
-  cliShort: pendingWorkspaceInvite-g
+  cliShort: g
   url: /pendingWorkspaceInvite/:uniqueId
   method: get
   description: Looks up a single "pendingWorkspaceInvite" row by uniqueId.
@@ -4029,7 +4029,7 @@ actions:
     dto: PendingWorkspaceInviteDto
 - name: pendingWorkspaceInviteBrowse
   cliName: browse
-  cliShort: pendingWorkspaceInvite-b
+  cliShort: b
   url: /pendingWorkspaceInvite/browse
   method: get
   qs:
@@ -4050,7 +4050,7 @@ actions:
     dto: PendingWorkspaceInviteOptionalDto
 - name: pendingWorkspaceInviteAwareDeletePreview
   cliName: delete-preview
-  cliShort: pendingWorkspaceInvite-dp
+  cliShort: dp
   url: /pendingWorkspaceInvite/delete-preview
   method: get
   qs:
@@ -4073,7 +4073,7 @@ actions:
         type: int64
 - name: pendingWorkspaceInviteAwareDelete
   cliName: delete
-  cliShort: pendingWorkspaceInvite-d
+  cliShort: d
   url: /pendingWorkspaceInvite/delete
   method: post
   description: Deletes the given "pendingWorkspaceInvite" uniqueIds, along with everything
@@ -4085,7 +4085,7 @@ actions:
       primitive: string
 - name: preferenceCreate
   cliName: create
-  cliShort: preference-c
+  cliShort: c
   url: /preference
   method: post
   description: Creates a new "preference" row.
@@ -4096,7 +4096,7 @@ actions:
     dto: PreferenceDto
 - name: preferenceUpdate
   cliName: update
-  cliShort: preference-u
+  cliShort: u
   url: /preference/:uniqueId
   method: patch
   description: Applies a partial update to a "preference" row by uniqueId.
@@ -4107,7 +4107,7 @@ actions:
     dto: PreferenceDto
 - name: preferenceGet
   cliName: get
-  cliShort: preference-g
+  cliShort: g
   url: /preference/:uniqueId
   method: get
   description: Looks up a single "preference" row by uniqueId.
@@ -4116,7 +4116,7 @@ actions:
     dto: PreferenceDto
 - name: preferenceBrowse
   cliName: browse
-  cliShort: preference-b
+  cliShort: b
   url: /preference/browse
   method: get
   qs:
@@ -4136,7 +4136,7 @@ actions:
     dto: PreferenceOptionalDto
 - name: preferenceAwareDeletePreview
   cliName: delete-preview
-  cliShort: preference-dp
+  cliShort: dp
   url: /preference/delete-preview
   method: get
   qs:
@@ -4159,7 +4159,7 @@ actions:
         type: int64
 - name: preferenceAwareDelete
   cliName: delete
-  cliShort: preference-d
+  cliShort: d
   url: /preference/delete
   method: post
   description: Deletes the given "preference" uniqueIds, along with everything preferenceAwareDeletePreview
@@ -4171,7 +4171,7 @@ actions:
       primitive: string
 - name: userProfileCreate
   cliName: create
-  cliShort: userProfile-c
+  cliShort: c
   url: /userProfile
   method: post
   description: Creates a new "userProfile" row.
@@ -4182,7 +4182,7 @@ actions:
     dto: UserProfileDto
 - name: userProfileUpdate
   cliName: update
-  cliShort: userProfile-u
+  cliShort: u
   url: /userProfile/:uniqueId
   method: patch
   description: Applies a partial update to a "userProfile" row by uniqueId.
@@ -4193,7 +4193,7 @@ actions:
     dto: UserProfileDto
 - name: userProfileGet
   cliName: get
-  cliShort: userProfile-g
+  cliShort: g
   url: /userProfile/:uniqueId
   method: get
   description: Looks up a single "userProfile" row by uniqueId.
@@ -4202,7 +4202,7 @@ actions:
     dto: UserProfileDto
 - name: userProfileBrowse
   cliName: browse
-  cliShort: userProfile-b
+  cliShort: b
   url: /userProfile/browse
   method: get
   qs:
@@ -4222,7 +4222,7 @@ actions:
     dto: UserProfileOptionalDto
 - name: userProfileAwareDeletePreview
   cliName: delete-preview
-  cliShort: userProfile-dp
+  cliShort: dp
   url: /userProfile/delete-preview
   method: get
   qs:
@@ -4245,7 +4245,7 @@ actions:
         type: int64
 - name: userProfileAwareDelete
   cliName: delete
-  cliShort: userProfile-d
+  cliShort: d
   url: /userProfile/delete
   method: post
   description: Deletes the given "userProfile" uniqueIds, along with everything userProfileAwareDeletePreview
@@ -4257,7 +4257,7 @@ actions:
       primitive: string
 - name: publicJoinKeyCreate
   cliName: create
-  cliShort: publicJoinKey-c
+  cliShort: c
   url: /publicJoinKey
   method: post
   description: Creates a new "publicJoinKey" row.
@@ -4268,7 +4268,7 @@ actions:
     dto: PublicJoinKeyDto
 - name: publicJoinKeyUpdate
   cliName: update
-  cliShort: publicJoinKey-u
+  cliShort: u
   url: /publicJoinKey/:uniqueId
   method: patch
   description: Applies a partial update to a "publicJoinKey" row by uniqueId.
@@ -4279,7 +4279,7 @@ actions:
     dto: PublicJoinKeyDto
 - name: publicJoinKeyGet
   cliName: get
-  cliShort: publicJoinKey-g
+  cliShort: g
   url: /publicJoinKey/:uniqueId
   method: get
   description: Looks up a single "publicJoinKey" row by uniqueId.
@@ -4288,7 +4288,7 @@ actions:
     dto: PublicJoinKeyDto
 - name: publicJoinKeyBrowse
   cliName: browse
-  cliShort: publicJoinKey-b
+  cliShort: b
   url: /publicJoinKey/browse
   method: get
   qs:
@@ -4308,7 +4308,7 @@ actions:
     dto: PublicJoinKeyOptionalDto
 - name: publicJoinKeyAwareDeletePreview
   cliName: delete-preview
-  cliShort: publicJoinKey-dp
+  cliShort: dp
   url: /publicJoinKey/delete-preview
   method: get
   qs:
@@ -4331,7 +4331,7 @@ actions:
         type: int64
 - name: publicJoinKeyAwareDelete
   cliName: delete
-  cliShort: publicJoinKey-d
+  cliShort: d
   url: /publicJoinKey/delete
   method: post
   description: Deletes the given "publicJoinKey" uniqueIds, along with everything
@@ -4343,7 +4343,7 @@ actions:
       primitive: string
 - name: emailConfirmationCreate
   cliName: create
-  cliShort: emailConfirmation-c
+  cliShort: c
   url: /emailConfirmation
   method: post
   description: Creates a new "emailConfirmation" row.
@@ -4354,7 +4354,7 @@ actions:
     dto: EmailConfirmationDto
 - name: emailConfirmationUpdate
   cliName: update
-  cliShort: emailConfirmation-u
+  cliShort: u
   url: /emailConfirmation/:uniqueId
   method: patch
   description: Applies a partial update to a "emailConfirmation" row by uniqueId.
@@ -4365,7 +4365,7 @@ actions:
     dto: EmailConfirmationDto
 - name: emailConfirmationGet
   cliName: get
-  cliShort: emailConfirmation-g
+  cliShort: g
   url: /emailConfirmation/:uniqueId
   method: get
   description: Looks up a single "emailConfirmation" row by uniqueId.
@@ -4374,7 +4374,7 @@ actions:
     dto: EmailConfirmationDto
 - name: emailConfirmationBrowse
   cliName: browse
-  cliShort: emailConfirmation-b
+  cliShort: b
   url: /emailConfirmation/browse
   method: get
   qs:
@@ -4395,7 +4395,7 @@ actions:
     dto: EmailConfirmationOptionalDto
 - name: emailConfirmationAwareDeletePreview
   cliName: delete-preview
-  cliShort: emailConfirmation-dp
+  cliShort: dp
   url: /emailConfirmation/delete-preview
   method: get
   qs:
@@ -4418,7 +4418,7 @@ actions:
         type: int64
 - name: emailConfirmationAwareDelete
   cliName: delete
-  cliShort: emailConfirmation-d
+  cliShort: d
   url: /emailConfirmation/delete
   method: post
   description: Deletes the given "emailConfirmation" uniqueIds, along with everything
@@ -4430,7 +4430,7 @@ actions:
       primitive: string
 - name: phoneConfirmationCreate
   cliName: create
-  cliShort: phoneConfirmation-c
+  cliShort: c
   url: /phoneConfirmation
   method: post
   description: Creates a new "phoneConfirmation" row.
@@ -4441,7 +4441,7 @@ actions:
     dto: PhoneConfirmationDto
 - name: phoneConfirmationUpdate
   cliName: update
-  cliShort: phoneConfirmation-u
+  cliShort: u
   url: /phoneConfirmation/:uniqueId
   method: patch
   description: Applies a partial update to a "phoneConfirmation" row by uniqueId.
@@ -4452,7 +4452,7 @@ actions:
     dto: PhoneConfirmationDto
 - name: phoneConfirmationGet
   cliName: get
-  cliShort: phoneConfirmation-g
+  cliShort: g
   url: /phoneConfirmation/:uniqueId
   method: get
   description: Looks up a single "phoneConfirmation" row by uniqueId.
@@ -4461,7 +4461,7 @@ actions:
     dto: PhoneConfirmationDto
 - name: phoneConfirmationBrowse
   cliName: browse
-  cliShort: phoneConfirmation-b
+  cliShort: b
   url: /phoneConfirmation/browse
   method: get
   qs:
@@ -4482,7 +4482,7 @@ actions:
     dto: PhoneConfirmationOptionalDto
 - name: phoneConfirmationAwareDeletePreview
   cliName: delete-preview
-  cliShort: phoneConfirmation-dp
+  cliShort: dp
   url: /phoneConfirmation/delete-preview
   method: get
   qs:
@@ -4505,7 +4505,7 @@ actions:
         type: int64
 - name: phoneConfirmationAwareDelete
   cliName: delete
-  cliShort: phoneConfirmation-d
+  cliShort: d
   url: /phoneConfirmation/delete
   method: post
   description: Deletes the given "phoneConfirmation" uniqueIds, along with everything
@@ -4517,7 +4517,7 @@ actions:
       primitive: string
 - name: tokenCreate
   cliName: create
-  cliShort: token-c
+  cliShort: c
   url: /token
   method: post
   description: Creates a new "token" row.
@@ -4528,7 +4528,7 @@ actions:
     dto: TokenDto
 - name: tokenUpdate
   cliName: update
-  cliShort: token-u
+  cliShort: u
   url: /token/:uniqueId
   method: patch
   description: Applies a partial update to a "token" row by uniqueId.
@@ -4539,7 +4539,7 @@ actions:
     dto: TokenDto
 - name: tokenGet
   cliName: get
-  cliShort: token-g
+  cliShort: g
   url: /token/:uniqueId
   method: get
   description: Looks up a single "token" row by uniqueId.
@@ -4548,7 +4548,7 @@ actions:
     dto: TokenDto
 - name: tokenBrowse
   cliName: browse
-  cliShort: token-b
+  cliShort: b
   url: /token/browse
   method: get
   qs:
@@ -4568,7 +4568,7 @@ actions:
     dto: TokenOptionalDto
 - name: tokenAwareDeletePreview
   cliName: delete-preview
-  cliShort: token-dp
+  cliShort: dp
   url: /token/delete-preview
   method: get
   qs:
@@ -4591,7 +4591,7 @@ actions:
         type: int64
 - name: tokenAwareDelete
   cliName: delete
-  cliShort: token-d
+  cliShort: d
   url: /token/delete
   method: post
   description: Deletes the given "token" uniqueIds, along with everything tokenAwareDeletePreview
@@ -4603,7 +4603,7 @@ actions:
       primitive: string
 - name: workspaceInviteCreate
   cliName: create
-  cliShort: workspaceInvite-c
+  cliShort: c
   url: /workspaceInvite
   method: post
   description: Creates a new "workspaceInvite" row.
@@ -4614,7 +4614,7 @@ actions:
     dto: WorkspaceInviteDto
 - name: workspaceInviteUpdate
   cliName: update
-  cliShort: workspaceInvite-u
+  cliShort: u
   url: /workspaceInvite/:uniqueId
   method: patch
   description: Applies a partial update to a "workspaceInvite" row by uniqueId.
@@ -4625,7 +4625,7 @@ actions:
     dto: WorkspaceInviteDto
 - name: workspaceInviteGet
   cliName: get
-  cliShort: workspaceInvite-g
+  cliShort: g
   url: /workspaceInvite/:uniqueId
   method: get
   description: Looks up a single "workspaceInvite" row by uniqueId.
@@ -4634,7 +4634,7 @@ actions:
     dto: WorkspaceInviteDto
 - name: workspaceInviteBrowse
   cliName: browse
-  cliShort: workspaceInvite-b
+  cliShort: b
   url: /workspaceInvite/browse
   method: get
   qs:
@@ -4655,7 +4655,7 @@ actions:
     dto: WorkspaceInviteOptionalDto
 - name: workspaceInviteAwareDeletePreview
   cliName: delete-preview
-  cliShort: workspaceInvite-dp
+  cliShort: dp
   url: /workspaceInvite/delete-preview
   method: get
   qs:
@@ -4678,7 +4678,7 @@ actions:
         type: int64
 - name: workspaceInviteAwareDelete
   cliName: delete
-  cliShort: workspaceInvite-d
+  cliShort: d
   url: /workspaceInvite/delete
   method: post
   description: Deletes the given "workspaceInvite" uniqueIds, along with everything
@@ -4690,7 +4690,7 @@ actions:
       primitive: string
 - name: userWorkspaceCreate
   cliName: create
-  cliShort: userWorkspace-c
+  cliShort: c
   url: /userWorkspace
   method: post
   description: Creates a new "userWorkspace" row.
@@ -4701,7 +4701,7 @@ actions:
     dto: UserWorkspaceDto
 - name: userWorkspaceUpdate
   cliName: update
-  cliShort: userWorkspace-u
+  cliShort: u
   url: /userWorkspace/:uniqueId
   method: patch
   description: Applies a partial update to a "userWorkspace" row by uniqueId.
@@ -4712,7 +4712,7 @@ actions:
     dto: UserWorkspaceDto
 - name: userWorkspaceGet
   cliName: get
-  cliShort: userWorkspace-g
+  cliShort: g
   url: /userWorkspace/:uniqueId
   method: get
   description: Looks up a single "userWorkspace" row by uniqueId.
@@ -4721,7 +4721,7 @@ actions:
     dto: UserWorkspaceDto
 - name: userWorkspaceBrowse
   cliName: browse
-  cliShort: userWorkspace-b
+  cliShort: b
   url: /userWorkspace/browse
   method: get
   qs:
@@ -4741,7 +4741,7 @@ actions:
     dto: UserWorkspaceOptionalDto
 - name: userWorkspaceAwareDeletePreview
   cliName: delete-preview
-  cliShort: userWorkspace-dp
+  cliShort: dp
   url: /userWorkspace/delete-preview
   method: get
   qs:
@@ -4764,7 +4764,7 @@ actions:
         type: int64
 - name: userWorkspaceAwareDelete
   cliName: delete
-  cliShort: userWorkspace-d
+  cliShort: d
   url: /userWorkspace/delete
   method: post
   description: Deletes the given "userWorkspace" uniqueIds, along with everything
@@ -4776,7 +4776,7 @@ actions:
       primitive: string
 - name: workspaceRoleCreate
   cliName: create
-  cliShort: workspaceRole-c
+  cliShort: c
   url: /workspaceRole
   method: post
   description: Creates a new "workspaceRole" row.
@@ -4787,7 +4787,7 @@ actions:
     dto: WorkspaceRoleDto
 - name: workspaceRoleUpdate
   cliName: update
-  cliShort: workspaceRole-u
+  cliShort: u
   url: /workspaceRole/:uniqueId
   method: patch
   description: Applies a partial update to a "workspaceRole" row by uniqueId.
@@ -4798,7 +4798,7 @@ actions:
     dto: WorkspaceRoleDto
 - name: workspaceRoleGet
   cliName: get
-  cliShort: workspaceRole-g
+  cliShort: g
   url: /workspaceRole/:uniqueId
   method: get
   description: Looks up a single "workspaceRole" row by uniqueId.
@@ -4807,7 +4807,7 @@ actions:
     dto: WorkspaceRoleDto
 - name: workspaceRoleBrowse
   cliName: browse
-  cliShort: workspaceRole-b
+  cliShort: b
   url: /workspaceRole/browse
   method: get
   qs:
@@ -4827,7 +4827,7 @@ actions:
     dto: WorkspaceRoleOptionalDto
 - name: workspaceRoleAwareDeletePreview
   cliName: delete-preview
-  cliShort: workspaceRole-dp
+  cliShort: dp
   url: /workspaceRole/delete-preview
   method: get
   qs:
@@ -4850,7 +4850,7 @@ actions:
         type: int64
 - name: workspaceRoleAwareDelete
   cliName: delete
-  cliShort: workspaceRole-d
+  cliShort: d
   url: /workspaceRole/delete
   method: post
   description: Deletes the given "workspaceRole" uniqueIds, along with everything
@@ -4862,7 +4862,7 @@ actions:
       primitive: string
 - name: regionalContentCreate
   cliName: create
-  cliShort: regionalContent-c
+  cliShort: c
   url: /regionalContent
   method: post
   description: Creates a new "regionalContent" row.
@@ -4873,7 +4873,7 @@ actions:
     dto: RegionalContentDto
 - name: regionalContentUpdate
   cliName: update
-  cliShort: regionalContent-u
+  cliShort: u
   url: /regionalContent/:uniqueId
   method: patch
   description: Applies a partial update to a "regionalContent" row by uniqueId.
@@ -4884,7 +4884,7 @@ actions:
     dto: RegionalContentDto
 - name: regionalContentGet
   cliName: get
-  cliShort: regionalContent-g
+  cliShort: g
   url: /regionalContent/:uniqueId
   method: get
   description: Looks up a single "regionalContent" row by uniqueId.
@@ -4893,7 +4893,7 @@ actions:
     dto: RegionalContentDto
 - name: regionalContentBrowse
   cliName: browse
-  cliShort: regionalContent-b
+  cliShort: b
   url: /regionalContent/browse
   method: get
   qs:
@@ -4914,7 +4914,7 @@ actions:
     dto: RegionalContentOptionalDto
 - name: regionalContentAwareDeletePreview
   cliName: delete-preview
-  cliShort: regionalContent-dp
+  cliShort: dp
   url: /regionalContent/delete-preview
   method: get
   qs:
@@ -4937,7 +4937,7 @@ actions:
         type: int64
 - name: regionalContentAwareDelete
   cliName: delete
-  cliShort: regionalContent-d
+  cliShort: d
   url: /regionalContent/delete
   method: post
   description: Deletes the given "regionalContent" uniqueIds, along with everything
@@ -4949,7 +4949,7 @@ actions:
       primitive: string
 - name: publicAuthenticationCreate
   cliName: create
-  cliShort: publicAuthentication-c
+  cliShort: c
   url: /publicAuthentication
   method: post
   description: Creates a new "publicAuthentication" row.
@@ -4960,7 +4960,7 @@ actions:
     dto: PublicAuthenticationDto
 - name: publicAuthenticationUpdate
   cliName: update
-  cliShort: publicAuthentication-u
+  cliShort: u
   url: /publicAuthentication/:uniqueId
   method: patch
   description: Applies a partial update to a "publicAuthentication" row by uniqueId.
@@ -4971,7 +4971,7 @@ actions:
     dto: PublicAuthenticationDto
 - name: publicAuthenticationGet
   cliName: get
-  cliShort: publicAuthentication-g
+  cliShort: g
   url: /publicAuthentication/:uniqueId
   method: get
   description: Looks up a single "publicAuthentication" row by uniqueId.
@@ -4980,7 +4980,7 @@ actions:
     dto: PublicAuthenticationDto
 - name: publicAuthenticationBrowse
   cliName: browse
-  cliShort: publicAuthentication-b
+  cliShort: b
   url: /publicAuthentication/browse
   method: get
   qs:
@@ -5001,7 +5001,7 @@ actions:
     dto: PublicAuthenticationOptionalDto
 - name: publicAuthenticationAwareDeletePreview
   cliName: delete-preview
-  cliShort: publicAuthentication-dp
+  cliShort: dp
   url: /publicAuthentication/delete-preview
   method: get
   qs:
@@ -5024,7 +5024,7 @@ actions:
         type: int64
 - name: publicAuthenticationAwareDelete
   cliName: delete
-  cliShort: publicAuthentication-d
+  cliShort: d
   url: /publicAuthentication/delete
   method: post
   description: Deletes the given "publicAuthentication" uniqueIds, along with everything
@@ -5036,7 +5036,7 @@ actions:
       primitive: string
 - name: notificationConfigCreate
   cliName: create
-  cliShort: notificationConfig-c
+  cliShort: c
   url: /notificationConfig
   method: post
   description: Creates a new "notificationConfig" row.
@@ -5047,7 +5047,7 @@ actions:
     dto: NotificationConfigDto
 - name: notificationConfigUpdate
   cliName: update
-  cliShort: notificationConfig-u
+  cliShort: u
   url: /notificationConfig/:uniqueId
   method: patch
   description: Applies a partial update to a "notificationConfig" row by uniqueId.
@@ -5058,7 +5058,7 @@ actions:
     dto: NotificationConfigDto
 - name: notificationConfigGet
   cliName: get
-  cliShort: notificationConfig-g
+  cliShort: g
   url: /notificationConfig/:uniqueId
   method: get
   description: Looks up a single "notificationConfig" row by uniqueId.
@@ -5067,7 +5067,7 @@ actions:
     dto: NotificationConfigDto
 - name: notificationConfigBrowse
   cliName: browse
-  cliShort: notificationConfig-b
+  cliShort: b
   url: /notificationConfig/browse
   method: get
   qs:
@@ -5088,7 +5088,7 @@ actions:
     dto: NotificationConfigOptionalDto
 - name: notificationConfigAwareDeletePreview
   cliName: delete-preview
-  cliShort: notificationConfig-dp
+  cliShort: dp
   url: /notificationConfig/delete-preview
   method: get
   qs:
@@ -5111,7 +5111,7 @@ actions:
         type: int64
 - name: notificationConfigAwareDelete
   cliName: delete
-  cliShort: notificationConfig-d
+  cliShort: d
   url: /notificationConfig/delete
   method: post
   description: Deletes the given "notificationConfig" uniqueIds, along with everything
@@ -5123,7 +5123,7 @@ actions:
       primitive: string
 - name: workspaceConfigCreate
   cliName: create
-  cliShort: workspaceConfig-c
+  cliShort: c
   url: /workspaceConfig
   method: post
   description: Creates a new "workspaceConfig" row.
@@ -5134,7 +5134,7 @@ actions:
     dto: WorkspaceConfigDto
 - name: workspaceConfigUpdate
   cliName: update
-  cliShort: workspaceConfig-u
+  cliShort: u
   url: /workspaceConfig/:uniqueId
   method: patch
   description: Applies a partial update to a "workspaceConfig" row by uniqueId.
@@ -5145,7 +5145,7 @@ actions:
     dto: WorkspaceConfigDto
 - name: workspaceConfigGet
   cliName: get
-  cliShort: workspaceConfig-g
+  cliShort: g
   url: /workspaceConfig/:uniqueId
   method: get
   description: Looks up a single "workspaceConfig" row by uniqueId.
@@ -5154,7 +5154,7 @@ actions:
     dto: WorkspaceConfigDto
 - name: workspaceConfigBrowse
   cliName: browse
-  cliShort: workspaceConfig-b
+  cliShort: b
   url: /workspaceConfig/browse
   method: get
   qs:
@@ -5175,7 +5175,7 @@ actions:
     dto: WorkspaceConfigOptionalDto
 - name: workspaceConfigAwareDeletePreview
   cliName: delete-preview
-  cliShort: workspaceConfig-dp
+  cliShort: dp
   url: /workspaceConfig/delete-preview
   method: get
   qs:
@@ -5198,7 +5198,7 @@ actions:
         type: int64
 - name: workspaceConfigAwareDelete
   cliName: delete
-  cliShort: workspaceConfig-d
+  cliShort: d
   url: /workspaceConfig/delete
   method: post
   description: Deletes the given "workspaceConfig" uniqueIds, along with everything
@@ -5210,7 +5210,7 @@ actions:
       primitive: string
 - name: roleCreate
   cliName: create
-  cliShort: role-c
+  cliShort: c
   url: /role
   method: post
   description: Creates a new "role" row.
@@ -5221,7 +5221,7 @@ actions:
     dto: RoleDto
 - name: roleUpdate
   cliName: update
-  cliShort: role-u
+  cliShort: u
   url: /role/:uniqueId
   method: patch
   description: Applies a partial update to a "role" row by uniqueId.
@@ -5232,7 +5232,7 @@ actions:
     dto: RoleDto
 - name: roleGet
   cliName: get
-  cliShort: role-g
+  cliShort: g
   url: /role/:uniqueId
   method: get
   description: Looks up a single "role" row by uniqueId.
@@ -5241,7 +5241,7 @@ actions:
     dto: RoleDto
 - name: roleBrowse
   cliName: browse
-  cliShort: role-b
+  cliShort: b
   url: /role/browse
   method: get
   qs:
@@ -5261,7 +5261,7 @@ actions:
     dto: RoleOptionalDto
 - name: roleAwareDeletePreview
   cliName: delete-preview
-  cliShort: role-dp
+  cliShort: dp
   url: /role/delete-preview
   method: get
   qs:
@@ -5284,7 +5284,7 @@ actions:
         type: int64
 - name: roleAwareDelete
   cliName: delete
-  cliShort: role-d
+  cliShort: d
   url: /role/delete
   method: post
   description: Deletes the given "role" uniqueIds, along with everything roleAwareDeletePreview
@@ -5296,7 +5296,7 @@ actions:
       primitive: string
 - name: workspaceTypeCreate
   cliName: create
-  cliShort: workspaceType-c
+  cliShort: c
   url: /workspaceType
   method: post
   description: Creates a new "workspaceType" row.
@@ -5307,7 +5307,7 @@ actions:
     dto: WorkspaceTypeDto
 - name: workspaceTypeUpdate
   cliName: update
-  cliShort: workspaceType-u
+  cliShort: u
   url: /workspaceType/:uniqueId
   method: patch
   description: Applies a partial update to a "workspaceType" row by uniqueId.
@@ -5318,7 +5318,7 @@ actions:
     dto: WorkspaceTypeDto
 - name: workspaceTypeGet
   cliName: get
-  cliShort: workspaceType-g
+  cliShort: g
   url: /workspaceType/:uniqueId
   method: get
   description: Looks up a single "workspaceType" row by uniqueId.
@@ -5327,7 +5327,7 @@ actions:
     dto: WorkspaceTypeDto
 - name: workspaceTypeBrowse
   cliName: browse
-  cliShort: workspaceType-b
+  cliShort: b
   url: /workspaceType/browse
   method: get
   qs:
@@ -5347,7 +5347,7 @@ actions:
     dto: WorkspaceTypeOptionalDto
 - name: workspaceTypeAwareDeletePreview
   cliName: delete-preview
-  cliShort: workspaceType-dp
+  cliShort: dp
   url: /workspaceType/delete-preview
   method: get
   qs:
@@ -5370,7 +5370,7 @@ actions:
         type: int64
 - name: workspaceTypeAwareDelete
   cliName: delete
-  cliShort: workspaceType-d
+  cliShort: d
   url: /workspaceType/delete
   method: post
   description: Deletes the given "workspaceType" uniqueIds, along with everything
@@ -5382,7 +5382,7 @@ actions:
       primitive: string
 - name: userCreate
   cliName: create
-  cliShort: user-c
+  cliShort: c
   url: /user
   method: post
   description: Creates a new "user" row.
@@ -5393,7 +5393,7 @@ actions:
     dto: UserDto
 - name: userUpdate
   cliName: update
-  cliShort: user-u
+  cliShort: u
   url: /user/:uniqueId
   method: patch
   description: Applies a partial update to a "user" row by uniqueId.
@@ -5404,7 +5404,7 @@ actions:
     dto: UserDto
 - name: userGet
   cliName: get
-  cliShort: user-g
+  cliShort: g
   url: /user/:uniqueId
   method: get
   description: Looks up a single "user" row by uniqueId.
@@ -5413,7 +5413,7 @@ actions:
     dto: UserDto
 - name: userBrowse
   cliName: browse
-  cliShort: user-b
+  cliShort: b
   url: /user/browse
   method: get
   qs:
@@ -5433,7 +5433,7 @@ actions:
     dto: UserOptionalDto
 - name: userAwareDeletePreview
   cliName: delete-preview
-  cliShort: user-dp
+  cliShort: dp
   url: /user/delete-preview
   method: get
   qs:
@@ -5456,7 +5456,7 @@ actions:
         type: int64
 - name: userAwareDelete
   cliName: delete
-  cliShort: user-d
+  cliShort: d
   url: /user/delete
   method: post
   description: Deletes the given "user" uniqueIds, along with everything userAwareDeletePreview
@@ -5468,7 +5468,7 @@ actions:
       primitive: string
 - name: workspaceCreate
   cliName: create
-  cliShort: workspace-c
+  cliShort: c
   url: /workspace
   method: post
   description: Creates a new "workspace" row.
@@ -5479,7 +5479,7 @@ actions:
     dto: WorkspaceDto
 - name: workspaceUpdate
   cliName: update
-  cliShort: workspace-u
+  cliShort: u
   url: /workspace/:uniqueId
   method: patch
   description: Applies a partial update to a "workspace" row by uniqueId.
@@ -5490,7 +5490,7 @@ actions:
     dto: WorkspaceDto
 - name: workspaceGet
   cliName: get
-  cliShort: workspace-g
+  cliShort: g
   url: /workspace/:uniqueId
   method: get
   description: Looks up a single "workspace" row by uniqueId.
@@ -5499,7 +5499,7 @@ actions:
     dto: WorkspaceDto
 - name: workspaceBrowse
   cliName: browse
-  cliShort: workspace-b
+  cliShort: b
   url: /workspace/browse
   method: get
   qs:
@@ -5519,7 +5519,7 @@ actions:
     dto: WorkspaceOptionalDto
 - name: workspaceAwareDeletePreview
   cliName: delete-preview
-  cliShort: workspace-dp
+  cliShort: dp
   url: /workspace/delete-preview
   method: get
   qs:
@@ -5542,7 +5542,7 @@ actions:
         type: int64
 - name: workspaceAwareDelete
   cliName: delete
-  cliShort: workspace-d
+  cliShort: d
   url: /workspace/delete
   method: post
   description: Deletes the given "workspace" uniqueIds, along with everything workspaceAwareDeletePreview
@@ -5554,7 +5554,7 @@ actions:
       primitive: string
 - name: passportCreate
   cliName: create
-  cliShort: passport-c
+  cliShort: c
   url: /passport
   method: post
   description: Creates a new "passport" row.
@@ -5565,7 +5565,7 @@ actions:
     dto: PassportDto
 - name: passportUpdate
   cliName: update
-  cliShort: passport-u
+  cliShort: u
   url: /passport/:uniqueId
   method: patch
   description: Applies a partial update to a "passport" row by uniqueId.
@@ -5576,7 +5576,7 @@ actions:
     dto: PassportDto
 - name: passportGet
   cliName: get
-  cliShort: passport-g
+  cliShort: g
   url: /passport/:uniqueId
   method: get
   description: Looks up a single "passport" row by uniqueId.
@@ -5585,7 +5585,7 @@ actions:
     dto: PassportDto
 - name: passportBrowse
   cliName: browse
-  cliShort: passport-b
+  cliShort: b
   url: /passport/browse
   method: get
   qs:
@@ -5605,7 +5605,7 @@ actions:
     dto: PassportOptionalDto
 - name: passportAwareDeletePreview
   cliName: delete-preview
-  cliShort: passport-dp
+  cliShort: dp
   url: /passport/delete-preview
   method: get
   qs:
@@ -5628,7 +5628,7 @@ actions:
         type: int64
 - name: passportAwareDelete
   cliName: delete
-  cliShort: passport-d
+  cliShort: d
   url: /passport/delete
   method: post
   description: Deletes the given "passport" uniqueIds, along with everything passportAwareDeletePreview
@@ -5640,7 +5640,7 @@ actions:
       primitive: string
 - name: notificationCreate
   cliName: create
-  cliShort: notification-c
+  cliShort: c
   url: /notification
   method: post
   description: Creates a new "notification" row.
@@ -5651,7 +5651,7 @@ actions:
     dto: NotificationDto
 - name: notificationUpdate
   cliName: update
-  cliShort: notification-u
+  cliShort: u
   url: /notification/:uniqueId
   method: patch
   description: Applies a partial update to a "notification" row by uniqueId.
@@ -5662,7 +5662,7 @@ actions:
     dto: NotificationDto
 - name: notificationGet
   cliName: get
-  cliShort: notification-g
+  cliShort: g
   url: /notification/:uniqueId
   method: get
   description: Looks up a single "notification" row by uniqueId.
@@ -5671,7 +5671,7 @@ actions:
     dto: NotificationDto
 - name: notificationBrowse
   cliName: browse
-  cliShort: notification-b
+  cliShort: b
   url: /notification/browse
   method: get
   qs:
@@ -5691,7 +5691,7 @@ actions:
     dto: NotificationOptionalDto
 - name: notificationAwareDeletePreview
   cliName: delete-preview
-  cliShort: notification-dp
+  cliShort: dp
   url: /notification/delete-preview
   method: get
   qs:
@@ -5714,7 +5714,7 @@ actions:
         type: int64
 - name: notificationAwareDelete
   cliName: delete
-  cliShort: notification-d
+  cliShort: d
   url: /notification/delete
   method: post
   description: Deletes the given "notification" uniqueIds, along with everything notificationAwareDeletePreview

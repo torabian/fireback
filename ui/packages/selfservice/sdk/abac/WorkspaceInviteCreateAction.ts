@@ -135,7 +135,7 @@ export class WorkspaceInviteCreateAction {
   static Definition = {
     name: "workspaceInviteCreate",
     cliName: "create",
-    cliShort: "workspaceInvite-c",
+    cliShort: "c",
     url: "/workspaceInvite",
     method: "post",
     description: 'Creates a new "workspaceInvite" row.',

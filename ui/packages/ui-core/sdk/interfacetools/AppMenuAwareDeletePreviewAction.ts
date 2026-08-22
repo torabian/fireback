@@ -207,7 +207,7 @@ export class AppMenuAwareDeletePreviewAction {
   static Definition = {
     name: "appMenuAwareDeletePreview",
     cliName: "delete-preview",
-    cliShort: "appMenu-dp",
+    cliShort: "dp",
     url: "/appMenu/delete-preview",
     method: "get",
     qs: [

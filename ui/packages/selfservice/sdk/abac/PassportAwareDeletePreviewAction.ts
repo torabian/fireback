@@ -207,7 +207,7 @@ export class PassportAwareDeletePreviewAction {
   static Definition = {
     name: "passportAwareDeletePreview",
     cliName: "delete-preview",
-    cliShort: "passport-dp",
+    cliShort: "dp",
     url: "/passport/delete-preview",
     method: "get",
     qs: [

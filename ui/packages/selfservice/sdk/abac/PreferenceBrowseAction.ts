@@ -193,7 +193,7 @@ export class PreferenceBrowseAction {
   static Definition = {
     name: "preferenceBrowse",
     cliName: "browse",
-    cliShort: "preference-b",
+    cliShort: "b",
     url: "/preference/browse",
     method: "get",
     qs: [

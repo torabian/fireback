@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package abacdefs
 
 import "github.com/torabian/emi/emigo"

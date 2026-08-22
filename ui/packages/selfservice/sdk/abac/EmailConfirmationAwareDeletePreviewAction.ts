@@ -210,7 +210,7 @@ export class EmailConfirmationAwareDeletePreviewAction {
   static Definition = {
     name: "emailConfirmationAwareDeletePreview",
     cliName: "delete-preview",
-    cliShort: "emailConfirmation-dp",
+    cliShort: "dp",
     url: "/emailConfirmation/delete-preview",
     method: "get",
     qs: [

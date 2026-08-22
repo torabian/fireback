@@ -198,7 +198,7 @@ export class PhoneConfirmationBrowseAction {
   static Definition = {
     name: "phoneConfirmationBrowse",
     cliName: "browse",
-    cliShort: "phoneConfirmation-b",
+    cliShort: "b",
     url: "/phoneConfirmation/browse",
     method: "get",
     qs: [

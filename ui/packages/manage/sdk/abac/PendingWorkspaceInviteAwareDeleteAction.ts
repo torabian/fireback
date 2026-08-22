@@ -121,7 +121,7 @@ export class PendingWorkspaceInviteAwareDeleteAction {
   static Definition = {
     name: "pendingWorkspaceInviteAwareDelete",
     cliName: "delete",
-    cliShort: "pendingWorkspaceInvite-d",
+    cliShort: "d",
     url: "/pendingWorkspaceInvite/delete",
     method: "post",
     description:

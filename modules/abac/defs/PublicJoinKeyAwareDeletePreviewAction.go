@@ -39,7 +39,7 @@ func PublicJoinKeyAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "PublicJoinKeyAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "publicJoinKey-dp",
+		CliShort:    "dp",
 		URL:         "/publicJoinKey/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "publicJoinKey" uniqueIds would affect, without deleting anything.`,

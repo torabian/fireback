@@ -115,7 +115,7 @@ export class EmailSenderAwareDeleteAction {
   static Definition = {
     name: "emailSenderAwareDelete",
     cliName: "delete",
-    cliShort: "emailSender-d",
+    cliShort: "d",
     url: "/emailSender/delete",
     method: "post",
     description:

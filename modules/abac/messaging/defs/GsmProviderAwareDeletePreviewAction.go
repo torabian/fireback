@@ -43,7 +43,7 @@ func GsmProviderAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "GsmProviderAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "gsmProvider-dp",
+		CliShort:    "dp",
 		URL:         "/gsmProvider/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "gsmProvider" uniqueIds would affect, without deleting anything.`,

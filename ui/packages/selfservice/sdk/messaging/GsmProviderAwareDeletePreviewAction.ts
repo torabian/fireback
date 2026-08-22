@@ -207,7 +207,7 @@ export class GsmProviderAwareDeletePreviewAction {
   static Definition = {
     name: "gsmProviderAwareDeletePreview",
     cliName: "delete-preview",
-    cliShort: "gsmProvider-dp",
+    cliShort: "dp",
     url: "/gsmProvider/delete-preview",
     method: "get",
     qs: [

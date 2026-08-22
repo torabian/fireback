@@ -149,7 +149,7 @@ export class CapabilityUpdateAction {
   static Definition = {
     name: "capabilityUpdate",
     cliName: "update",
-    cliShort: "capability-u",
+    cliShort: "u",
     url: "/capability/:uniqueId string",
     method: "patch",
     description: 'Applies a partial update to a "capability" row by uniqueId.',

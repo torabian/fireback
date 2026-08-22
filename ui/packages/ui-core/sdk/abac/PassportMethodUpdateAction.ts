@@ -153,7 +153,7 @@ export class PassportMethodUpdateAction {
   static Definition = {
     name: "passportMethodUpdate",
     cliName: "update",
-    cliShort: "passportMethod-u",
+    cliShort: "u",
     url: "/passportMethod/:uniqueId string",
     method: "patch",
     description:

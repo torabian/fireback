@@ -39,7 +39,7 @@ func NotificationConfigBrowseActionMeta() struct {
 	}{
 		Name:        "NotificationConfigBrowseAction",
 		CliName:     "browse",
-		CliShort:    "notificationConfig-b",
+		CliShort:    "b",
 		URL:         "/notificationConfig/browse",
 		Method:      "GET",
 		Description: `Returns "notificationConfig" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

@@ -41,7 +41,7 @@ func PublicJoinKeyUpdateActionMeta() struct {
 	}{
 		Name:        "PublicJoinKeyUpdateAction",
 		CliName:     "update",
-		CliShort:    "publicJoinKey-u",
+		CliShort:    "u",
 		URL:         "/publicJoinKey/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "publicJoinKey" row by uniqueId.`,

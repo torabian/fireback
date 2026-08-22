@@ -188,7 +188,7 @@ export class WorkspaceBrowseAction {
   static Definition = {
     name: "workspaceBrowse",
     cliName: "browse",
-    cliShort: "workspace-b",
+    cliShort: "b",
     url: "/workspace/browse",
     method: "get",
     qs: [

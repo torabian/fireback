@@ -40,7 +40,7 @@ func PreferenceCreateActionMeta() struct {
 	}{
 		Name:        "PreferenceCreateAction",
 		CliName:     "create",
-		CliShort:    "preference-c",
+		CliShort:    "c",
 		URL:         "/preference",
 		Method:      "POST",
 		Description: `Creates a new "preference" row.`,

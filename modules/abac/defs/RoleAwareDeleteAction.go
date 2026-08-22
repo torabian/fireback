@@ -40,7 +40,7 @@ func RoleAwareDeleteActionMeta() struct {
 	}{
 		Name:        "RoleAwareDeleteAction",
 		CliName:     "delete",
-		CliShort:    "role-d",
+		CliShort:    "d",
 		URL:         "/role/delete",
 		Method:      "POST",
 		Description: `Deletes the given "role" uniqueIds, along with everything roleAwareDeletePreview reports.`,

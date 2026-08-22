@@ -139,7 +139,7 @@ export class PublicAuthenticationCreateAction {
   static Definition = {
     name: "publicAuthenticationCreate",
     cliName: "create",
-    cliShort: "publicAuthentication-c",
+    cliShort: "c",
     url: "/publicAuthentication",
     method: "post",
     description: 'Creates a new "publicAuthentication" row.',

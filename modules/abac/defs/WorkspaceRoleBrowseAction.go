@@ -39,7 +39,7 @@ func WorkspaceRoleBrowseActionMeta() struct {
 	}{
 		Name:        "WorkspaceRoleBrowseAction",
 		CliName:     "browse",
-		CliShort:    "workspaceRole-b",
+		CliShort:    "b",
 		URL:         "/workspaceRole/browse",
 		Method:      "GET",
 		Description: `Returns "workspaceRole" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

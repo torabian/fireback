@@ -41,7 +41,7 @@ func PhoneConfirmationUpdateActionMeta() struct {
 	}{
 		Name:        "PhoneConfirmationUpdateAction",
 		CliName:     "update",
-		CliShort:    "phoneConfirmation-u",
+		CliShort:    "u",
 		URL:         "/phoneConfirmation/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "phoneConfirmation" row by uniqueId.`,

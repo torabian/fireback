@@ -206,7 +206,7 @@ export class WorkspaceRoleGetAction {
   static Definition = {
     name: "workspaceRoleGet",
     cliName: "get",
-    cliShort: "workspaceRole-g",
+    cliShort: "g",
     url: "/workspaceRole/:uniqueId string",
     method: "get",
     description: 'Looks up a single "workspaceRole" row by uniqueId.',

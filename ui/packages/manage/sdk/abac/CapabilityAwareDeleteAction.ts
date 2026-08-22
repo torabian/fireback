@@ -115,7 +115,7 @@ export class CapabilityAwareDeleteAction {
   static Definition = {
     name: "capabilityAwareDelete",
     cliName: "delete",
-    cliShort: "capability-d",
+    cliShort: "d",
     url: "/capability/delete",
     method: "post",
     description:
