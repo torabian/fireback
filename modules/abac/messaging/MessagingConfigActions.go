@@ -24,7 +24,7 @@ func MessagingConfigUpdateAction(c messagingdefs.MessagingConfigUpdateActionRequ
 	return &messagingdefs.MessagingConfigUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func MessagingWorkspaceConfigDistinctGetAction(c abacdefs.WorkspaceConfigDistinctGetActionRequest) (*messagingdefs.MessagingConfigGetActionResponse, error) {
+func MessagingConfigGetAction(c abacdefs.WorkspaceConfigDistinctGetActionRequest) (*messagingdefs.MessagingConfigGetActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
