@@ -67,6 +67,15 @@ var Menu = []*interfacetoolsdefs.AppMenuEntity{
 		CapabilityId:  emigo.NullableOf("root.manage.abac.workspace-config.query"),
 	},
 	{
+		UniqueId:      "messaging_config",
+		Label:         complexes.TStringFrom(map[string]string{"en": "Messaging Config", "fa": "تنظیمات پیام‌رسانی"}),
+		Href:          "/manage/messaging-config",
+		Icon:          "ios-theme/icons/settings.svg",
+		ActiveMatcher: "/messaging-config",
+		ParentId:      emigo.NullableOf("root-actions"),
+		WorkspaceId:   emigo.NullableOf(fireback.USER_SYSTEM),
+	},
+	{
 		UniqueId:      "email_sender",
 		Label:         complexes.TStringFrom(map[string]string{"en": "Email Sender", "fa": "ارسال ایمیل"}),
 		Href:          "/manage/email-senders",

@@ -71,6 +71,32 @@ description:
   general one" for a workspace).
 
 actions:
+  - name: MessagingConfigGet
+    url: /messaging/config
+    cliName: get
+    method: get
+    description: >-
+      Returns the single, global MessagingConfig row (there is exactly one for the
+      whole installation, not one per workspace) - if none exists yet, returns an
+      empty MessagingConfig instead of a 404.
+    out:
+      dto: MessagingConfigDto
+      envelope: GResponse
+
+  - name: MessagingConfigUpdate
+    url: /messaging/config
+    cliName: update
+    method: patch
+    description: >-
+      Creates or updates the single, global MessagingConfig row (there is exactly
+      one for the whole installation, not one per workspace) - the row is created
+      on first write if it doesn't exist yet.
+    in:
+      dto: MessagingConfigOptionalDto
+    out:
+      dto: MessagingConfigDto
+      envelope: GResponse
+
   - name: SendEmail
     url: /email/send
     cliName: email
@@ -273,3 +299,35 @@ entities:
       - name: updatedAt
         type: complex
         complex: PlainTime
+  - name: MessagingConfig
+    cliShort: config
+    features:
+      actions: false
+    description: >-
+      Contains configuration which would be necessary for messaging and notification
+    fields:
+      - name: generalEmailProviderId
+        type: string?
+        description: >-
+          The unique-id of the email provider service, which will be used to
+          send the messages using it's service.
+      - name: generalGsmProviderId
+        type: string?
+        description: The unique-id of the general service which would be used to send text messages (sms).
+      - name: inviteToWorkspaceContentId
+        type: string?
+        description: The unique-id of the template used as default when a user is inviting a third-party into their own workspace.
+      - name: emailOtpContentId
+        type: string?
+        description: The unique-id of the template used to fill the message for email one-time-password requests.
+      - name: smsOtpContentId
+        type: string?
+        description: The unique-id of the template used for OTP text messages, including the one time password code.
+      - name: createdAt
+        type: complex
+        complex: PlainTime
+      - name: updatedAt
+        type: complex
+        complex: PlainTime
+      - name: workspaceId
+        type: string

@@ -54,6 +54,9 @@ func ModuleSetup() *application.ModuleProvider {
 				messagingdefs.SendEmailWithProviderActionGin(g, SendEmailWithProviderAction)
 				messagingdefs.GsmSendSmsWithProviderActionGin(g, GsmSendSmsWithProviderAction)
 
+				messagingdefs.MessagingConfigGetActionGin(g, MessagingConfigGetAction)
+				messagingdefs.MessagingConfigUpdateActionGin(g, MessagingConfigUpdateAction)
+
 				return nil
 			},
 		},
@@ -71,6 +74,7 @@ func ModuleSetup() *application.ModuleProvider {
 			&messagingdefs.EmailSenderEntity{},
 			&messagingdefs.GsmProviderEntity{},
 			&messagingdefs.WebPushConfigEntity{},
+			&messagingdefs.MessagingConfigEntity{},
 		)
 	})
 
@@ -159,6 +163,15 @@ func ModuleSetup() *application.ModuleProvider {
 						messagingdefs.WebPushConfigUpdateActionCliHandler(WebPushConfigUpdateAction),
 						messagingdefs.WebPushConfigAwareDeletePreviewActionCliHandler(WebPushConfigAwareDeletePreviewAction),
 						messagingdefs.WebPushConfigAwareDeleteActionCliHandler(WebPushConfigAwareDeleteAction),
+					},
+				},
+				&cli.Command{
+					Name:        "config",
+					Description: `The single, global messaging config (general email/gsm provider, invite/otp template ids).`,
+					Usage:       `The single, global messaging config (general email/gsm provider, invite/otp template ids).`,
+					Commands: []*cli.Command{
+						messagingdefs.MessagingConfigGetActionCliHandler(MessagingConfigGetAction),
+						messagingdefs.MessagingConfigUpdateActionCliHandler(MessagingConfigUpdateAction),
 					},
 				},
 			},
