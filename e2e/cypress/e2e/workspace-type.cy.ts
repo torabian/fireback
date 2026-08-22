@@ -68,18 +68,17 @@ describe("Workspace types", () => {
   // --- WorkspaceType validation ---
 
   it("should NOT be able to create a workspace type with no role.", () => {
-    cy.task(
-      "execSupress",
-      ` ws workspaceType-c --title noRole --slug /no-role`,
-    ).then((content: string) => {
-      expect(content).to.contain("RoleIsNotAccessible");
-    });
+    cy.task("execSupress", ` ws type c  --title noRole --slug /no-role`).then(
+      (content: string) => {
+        expect(content).to.contain("RoleIsNotAccessible");
+      },
+    );
   });
 
   it("should NOT be able to create a workspace type with a role that doesn't exist.", () => {
     cy.task(
       "execSupress",
-      ` ws workspaceType-c --title badRole --slug /bad-role --role-id does-not-exist`,
+      ` ws type c  --title badRole --slug /bad-role --role-id does-not-exist`,
     ).then((content: string) => {
       expect(content).to.contain("RoleIsNotAccessible");
     });
@@ -95,7 +94,7 @@ describe("Workspace types", () => {
 
       cy.task(
         "execSupress",
-        ` ws workspaceType-c --title wildcard --slug /wildcard --role-id ${role.uniqueId}`,
+        ` ws type c  --title wildcard --slug /wildcard --role-id ${role.uniqueId}`,
       ).then((updateContent: string) => {
         expect(updateContent).to.contain("RoleCannotBeSuperAdmin");
       });
@@ -119,7 +118,7 @@ describe("Workspace types", () => {
   it("workspace type slug must start with a slash.", () => {
     cy.task(
       "execSupress",
-      ` ws workspaceType-c --title bad --slug no-slash --role-id ${restrictedRoleId}`,
+      ` ws type c  --title bad --slug no-slash --role-id ${restrictedRoleId}`,
     ).then((content: string) => {
       expect(content).to.contain("SlugMustStartWithSlash");
     });
@@ -128,7 +127,7 @@ describe("Workspace types", () => {
   it("workspace type slug can only contain lowercase letters and dashes.", () => {
     cy.task(
       "execSupress",
-      ` ws workspaceType-c --title bad --slug /Has_Upper --role-id ${restrictedRoleId}`,
+      ` ws type c  --title bad --slug /Has_Upper --role-id ${restrictedRoleId}`,
     ).then((content: string) => {
       expect(content).to.contain("SlugInvalidFormat");
     });
@@ -138,7 +137,7 @@ describe("Workspace types", () => {
     const longSlug = "/" + "a".repeat(60);
     cy.task(
       "execSupress",
-      ` ws workspaceType-c --title bad --slug ${longSlug} --role-id ${restrictedRoleId}`,
+      ` ws type c  --title bad --slug ${longSlug} --role-id ${restrictedRoleId}`,
     ).then((content: string) => {
       expect(content).to.contain("SlugTooLong");
     });
@@ -149,7 +148,7 @@ describe("Workspace types", () => {
   it("should be able to create the customer workspace type.", () => {
     cy.task(
       "exec",
-      ` ws workspaceType-c --title customer --slug /customer --role-id ${restrictedRoleId}`,
+      ` ws type c  --title customer --slug /customer --role-id ${restrictedRoleId}`,
     ).then((content: string) => {
       const workspaceType = (
         JSON.parse(content) as SingleItemResponse<WorkspaceTypeItem>
@@ -169,7 +168,7 @@ describe("Workspace types", () => {
 
       cy.task(
         "execSupress",
-        ` ws workspaceType-c --title customer2 --slug /customer --role-id ${role.uniqueId}`,
+        ` ws type c  --title customer2 --slug /customer --role-id ${role.uniqueId}`,
       ).then((updateContent: string) => {
         expect(updateContent).to.contain("SlugAlreadyTaken");
       });
@@ -177,7 +176,7 @@ describe("Workspace types", () => {
   });
 
   it("should NOT be able to delete the seeded root workspace type.", () => {
-    cy.task("execSupress", ` ws workspaceType-d --unique-ids root`).then(
+    cy.task("execSupress", ` ws type d --unique-ids root`).then(
       (content: string) => {
         expect(content).to.contain("CannotDeleteRootWorkspaceType");
       },
@@ -197,7 +196,7 @@ describe("Workspace types", () => {
       method: "POST",
       url: SIGNUP_URL,
       body: {
-        value: "workspacetype-customer@test.com",
+        value: "workspace type c ustomer@test.com",
         type: "email",
         password: "testpass123",
         firstName: "Cust",

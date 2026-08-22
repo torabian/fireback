@@ -80,13 +80,13 @@ describe("Logging in with the signin", () => {
       // "ws type c" doesn't exist either - WorkspaceType's actions are registered
       // flat inside the "ws"/"workspace" group (WorkspaceCliCommands in
       // WorkspaceCli.go), not under their own "type" sub-group, so
-      // "workspaceType-c" (its CliShort) is what's reachable there. The slug also
+      // "workspace type c " (its CliShort) is what's reachable there. The slug also
       // now has an enforced format: must start with "/" (see
       // ValidateTheWorkspaceTypeEntity/WorkspaceTypeActions.go) - "customer" alone
       // fails validation, "/customer" doesn't.
       cy.task(
         "exec",
-        ` ws workspaceType-c --title customer --slug /customer --role-id ${roleId}`,
+        ` ws type c  --title customer --slug /customer --role-id ${roleId}`,
       );
     });
 

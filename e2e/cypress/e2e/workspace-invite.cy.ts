@@ -140,7 +140,7 @@ describe("Workspace invite: an admin (capability-driven, not root) invites someo
 
       cy.task(
         "exec",
-        ` ws workspaceType-c --title "checkendpointtests admin type" --slug /checkendpointtests-admin --role-id ${roleId}`,
+        ` ws type c  --title "checkendpointtests admin type" --slug /checkendpointtests-admin --role-id ${roleId}`,
       ).then((wtContent: string) => {
         setShared(
           "adminWorkspaceTypeId",
@@ -159,7 +159,7 @@ describe("Workspace invite: an admin (capability-driven, not root) invites someo
       ).data.item.uniqueId;
       cy.task(
         "exec",
-        ` ws workspaceType-c --title "checkendpointtests invitee type" --slug /checkendpointtests-invitee --role-id ${roleId}`,
+        ` ws type c  --title "checkendpointtests invitee type" --slug /checkendpointtests-invitee --role-id ${roleId}`,
       ).then((wtContent: string) => {
         setShared(
           "inviteeOwnWorkspaceTypeId",
@@ -171,7 +171,7 @@ describe("Workspace invite: an admin (capability-driven, not root) invites someo
 
     cy.task(
       "exec",
-      ` messaging emailSender-c --from-name Checkendpointtests --from-email-address checkendpointtests-sender@example.com --reply-to checkendpointtests-sender@example.com --nick-name checkendpointtests`,
+      ` messaging email sender c --from-name Checkendpointtests --from-email-address checkendpointtests-sender@example.com --reply-to checkendpointtests-sender@example.com --nick-name checkendpointtests`,
     ).then((content: string) => {
       const senderId = (
         JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>
@@ -179,7 +179,7 @@ describe("Workspace invite: an admin (capability-driven, not root) invites someo
 
       cy.task(
         "exec",
-        ` messaging emailProvider-c --type terminal --title checkendpointtests`,
+        ` messaging email provider c --type terminal --title checkendpointtests`,
       ).then((providerContent: string) => {
         const providerId = (
           JSON.parse(providerContent) as SingleItemResponse<{

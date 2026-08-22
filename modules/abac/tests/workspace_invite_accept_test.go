@@ -99,7 +99,7 @@ func lettersFromInt(n int64) string {
 // this repo's dev/test database is shared across other suites (cypress, other Go tests)
 // that may have already created it, so a failure here (most likely "already exists") is
 // only logged, never fatal. Every caller already independently requires the CLI binary
-// (createRoleAndWorkspaceType's own workspaceType-c call), so resolving it the normal,
+// (createRoleAndWorkspaceType's own workspace type c  call), so resolving it the normal,
 // skip-on-missing way here doesn't add a new hard dependency.
 func ensureEmailPassportMethod(t *testing.T, cfg TestConfig) {
 	t.Helper()
@@ -139,7 +139,7 @@ func createRoleAndWorkspaceType(t *testing.T, cfg TestConfig, roleName string, c
 	bin := cfg.ResolveAppBinary(t)
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.CLITimeout)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, bin, "ws", "workspaceType-c", "--title", roleName, "--slug", slug, "--role-id", role.Data.Item.UniqueId)
+	cmd := exec.CommandContext(ctx, bin, "ws", "workspace type c ", "--title", roleName, "--slug", slug, "--role-id", role.Data.Item.UniqueId)
 	cmd.Dir = cfg.WorkDir(t)
 	out, err := cmd.CombinedOutput()
 	if err != nil {

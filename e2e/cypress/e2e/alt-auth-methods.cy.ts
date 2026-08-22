@@ -47,12 +47,13 @@ function signupFreshAccount(label: string) {
       ` role create --name "checkendpointtests ${label} role" --capabilities-list-id '["root.abac.email-confirmation.query"]'`,
     )
     .then((content: string) => {
-      const roleId = (JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>)
-        .data.item.uniqueId;
+      const roleId = (
+        JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>
+      ).data.item.uniqueId;
       return cy
         .task(
           "exec",
-          ` ws workspaceType-c --title "checkendpointtests ${label} type" --slug /checkendpointtests-${label} --role-id ${roleId}`,
+          ` ws type c  --title "checkendpointtests ${label} type" --slug /checkendpointtests-${label} --role-id ${roleId}`,
         )
         .then((wtContent: string) => {
           const workspaceTypeId = (
@@ -83,7 +84,9 @@ function signupFreshAccount(label: string) {
               // root-authenticated call made after this signup would silently run as
               // this throwaway account instead of root.
               const token = response.body.data.item.session.token;
-              return cy.clearCookie("authorization").then(() => ({ email, token }));
+              return cy
+                .clearCookie("authorization")
+                .then(() => ({ email, token }));
             });
         });
     });
@@ -93,21 +96,23 @@ function configureEmailSending() {
   const senderAddr = `checkendpointtests-alt-auth-${Date.now()}@example.com`;
   cy.task(
     "exec",
-    ` messaging emailSender-c --from-name Checkendpointtests --from-email-address ${senderAddr} --reply-to ${senderAddr} --nick-name checkendpointtests`,
+    ` messaging email sender c --from-name Checkendpointtests --from-email-address ${senderAddr} --reply-to ${senderAddr} --nick-name checkendpointtests`,
   ).then((content: string) => {
-    const senderId = (JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>)
-      .data.item.uniqueId;
-    cy.task("exec", ` messaging emailProvider-c --type terminal --title checkendpointtests`).then(
-      (providerContent: string) => {
-        const providerId = (
-          JSON.parse(providerContent) as SingleItemResponse<{ uniqueId: string }>
-        ).data.item.uniqueId;
-        cy.task(
-          "exec",
-          ` notification create --general-email-provider-id ${providerId} --invite-to-workspace-sender-id ${senderId}`,
-        );
-      },
-    );
+    const senderId = (
+      JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>
+    ).data.item.uniqueId;
+    cy.task(
+      "exec",
+      ` messaging email provider c --type terminal --title checkendpointtests`,
+    ).then((providerContent: string) => {
+      const providerId = (
+        JSON.parse(providerContent) as SingleItemResponse<{ uniqueId: string }>
+      ).data.item.uniqueId;
+      cy.task(
+        "exec",
+        ` notification create --general-email-provider-id ${providerId} --invite-to-workspace-sender-id ${senderId}`,
+      );
+    });
   });
 }
 
@@ -119,12 +124,20 @@ function fetchOtpCode(value: string) {
         url: ui("/publicAuthentication/browse"),
         headers: authHeaders(rootToken),
       })
-      .then((response: Cypress.Response<ListResponse<{ passportValue: string; otp: string }>>) => {
-        expect(response.status).to.equal(200);
-        const match = response.body.data.items.filter((i) => i.passportValue === value).pop();
-        expect(match, `a publicAuthentication row for ${value}`).to.exist;
-        return match!.otp;
-      }),
+      .then(
+        (
+          response: Cypress.Response<
+            ListResponse<{ passportValue: string; otp: string }>
+          >,
+        ) => {
+          expect(response.status).to.equal(200);
+          const match = response.body.data.items
+            .filter((i) => i.passportValue === value)
+            .pop();
+          expect(match, `a publicAuthentication row for ${value}`).to.exist;
+          return match!.otp;
+        },
+      ),
   );
 }
 
@@ -167,7 +180,11 @@ describe("Abac: alternate auth methods (otp, totp, oauth, os-login)", () => {
 
   it("ClassicPassportOtp should sign in with the real code and reject a wrong one.", () => {
     signupFreshAccount("otp-confirm").then(({ email }) => {
-      cy.request({ method: "POST", url: ui("/workspace/passport/request-otp"), body: { value: email } });
+      cy.request({
+        method: "POST",
+        url: ui("/workspace/passport/request-otp"),
+        body: { value: email },
+      });
 
       fetchOtpCode(email).then((code) => {
         cy.request({
@@ -176,7 +193,8 @@ describe("Abac: alternate auth methods (otp, totp, oauth, os-login)", () => {
           body: { value: email, otp: code },
         }).then((response: Cypress.Response<SignupResponse>) => {
           expect(response.status).to.equal(200);
-          expect(response.body.data.item.session.token).to.be.a("string").and.not.be.empty;
+          expect(response.body.data.item.session.token).to.be.a("string").and
+            .not.be.empty;
         });
       });
 
@@ -201,7 +219,11 @@ describe("Abac: alternate auth methods (otp, totp, oauth, os-login)", () => {
       cy.request({
         method: "POST",
         url: ui("/passport/totp/confirm"),
-        body: { value: email, password: "checkendpointtests-pass-123", totpCode: "000000" },
+        body: {
+          value: email,
+          password: "checkendpointtests-pass-123",
+          totpCode: "000000",
+        },
         failOnStatusCode: false,
       }).then((response) => {
         expect(response.status).to.not.equal(200);
@@ -222,7 +244,10 @@ describe("Abac: alternate auth methods (otp, totp, oauth, os-login)", () => {
     cy.request({
       method: "POST",
       url: ui("/passport/via-oauth"),
-      body: { service: "google", token: `checkendpointtests-not-real-${Date.now()}` },
+      body: {
+        service: "google",
+        token: `checkendpointtests-not-real-${Date.now()}`,
+      },
       failOnStatusCode: false,
     }).then((response) => {
       expect(response.status).to.not.equal(200);
@@ -238,10 +263,13 @@ describe("Abac: alternate auth methods (otp, totp, oauth, os-login)", () => {
     cy.request({
       method: "GET",
       url: ui("/passports/os/login"),
-    }).then((response: Cypress.Response<SingleItemResponse<{ token: string }>>) => {
-      expect(response.status).to.equal(200);
-      expect(response.body.data.item.token).to.be.a("string").and.not.be.empty;
-    });
+    }).then(
+      (response: Cypress.Response<SingleItemResponse<{ token: string }>>) => {
+        expect(response.status).to.equal(200);
+        expect(response.body.data.item.token).to.be.a("string").and.not.be
+          .empty;
+      },
+    );
   });
 
   endFirebackServer();

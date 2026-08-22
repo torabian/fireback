@@ -419,7 +419,7 @@ func TestEmailSenderCreate_CLI_Help(t *testing.T) {
 	cmd.Dir = cfg.WorkDir(t)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		t.Fatalf("`%s messaging emailSender-c --help` failed: %v\noutput:\n%s", bin, err, out)
+		t.Fatalf("`%s messaging email sender c --help` failed: %v\noutput:\n%s", bin, err, out)
 	}
 
 	// urfave's default help renderer only prints the primary Name ("create", shared by

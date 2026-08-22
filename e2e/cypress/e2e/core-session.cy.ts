@@ -107,7 +107,7 @@ describe("Abac: core session lifecycle (signup, check-passport, signin, whoami, 
       ).data.item.uniqueId;
       cy.task(
         "exec",
-        ` ws workspaceType-c --title "checkendpointtests core-session type" --slug /checkendpointtests-core-session --role-id ${roleId}`,
+        ` ws type c  --title "checkendpointtests core-session type" --slug /checkendpointtests-core-session --role-id ${roleId}`,
       ).then((wtContent: string) => {
         const workspaceTypeId = (
           JSON.parse(wtContent) as SingleItemResponse<{ uniqueId: string }>
